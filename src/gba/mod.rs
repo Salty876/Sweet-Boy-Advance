@@ -1,4 +1,5 @@
 pub mod memory;
+mod bus;
 
 
 struct gba {
