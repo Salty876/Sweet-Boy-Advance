@@ -22,7 +22,7 @@ pub struct MemoryBus {
 }
 
 impl MemoryBus{
-    fn new() -> Self {
+    pub fn new() -> Self {
 
         Self {
             EWRAM: [0; 1024 * 256],
