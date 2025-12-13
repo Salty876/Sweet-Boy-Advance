@@ -2,6 +2,7 @@ use crate::gba::BusAccess;
 
 pub mod decode;
 pub mod arm;
+pub(crate) mod tests;
 
 pub const STACK_POINTER_REG:usize = 13;
 pub const LINK_REG:usize = 14; 
@@ -88,7 +89,9 @@ impl CPU {
 
 
             // TODO: decoed and execute thumb
-            let cycles = 1;
+            let decoded = decode::decode_arm(opcode);
+            let cycles = arm::execute_arm(self, bus, decoded);
+
             self.cycles += cycles as u64;
             cycles
         }
@@ -99,34 +102,3 @@ impl CPU {
 
 
 
-#[cfg(test)]
-mod tests{
-    use super::*;
-    use crate::gba::{BusAccess, MemoryBus, cpu};
-
-    #[test]
-    fn cpu_steps_through_rom_arm(){
-        let mut bus = MemoryBus::new();
-        
-        // 3 instructions
-        bus.load_rom(vec![
-            0x00, 0x00, 0x00, 0x00, // at 0x0800_0000
-            0x11, 0x11, 0x11, 0x11, // at 0x0800_0004
-            0x22, 0x22, 0x22, 0x22, // at 0x0800_0008
-        ]);
-
-        let mut cpu = CPU::new();
-
-        assert_eq!(cpu.pc(), 0x0800_0000);
-
-        cpu.step(&mut bus);
-        assert_eq!(cpu.pc(), 0x0800_0004);
-
-        cpu.step(&mut bus);
-        assert_eq!(cpu.pc(), 0x0800_0008);
-
-        cpu.step(&mut bus);
-        assert_eq!(cpu.pc(), 0x0800_000C);
-
-    }
-}
